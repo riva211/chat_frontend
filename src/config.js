@@ -4,16 +4,26 @@ const config = {
   },
 
   getWsUrl: () => {
+    // If explicit WebSocket URL is provided, use it
     if (process.env.REACT_APP_WS_URL) {
       return process.env.REACT_APP_WS_URL;
     }
 
+    // If API URL is provided, derive WebSocket URL from it
+    if (process.env.REACT_APP_API_URL) {
+      const apiUrl = new URL(process.env.REACT_APP_API_URL);
+      const protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${protocol}//${apiUrl.host}`;
+    }
+
+    // In production, try to derive from current location
     if (process.env.NODE_ENV === 'production') {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
       return `${protocol}//${host}`;
     }
 
+    // Default to localhost for development
     return 'ws://localhost:5000';
   },
 
